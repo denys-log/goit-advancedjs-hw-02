@@ -16,35 +16,38 @@ flatpickr('#datetime-picker', {
   onClose(selectedDates) {
     if (new Date() > selectedDates[0]) {
       iziToast.error({
-        title: 'Error',
         message: 'Please choose a date in the future',
         position: 'topRight',
       });
-      // window.alert('Please choose a date in the future');
     } else {
       userSelectedDate = selectedDates[0];
-      button.removeAttribute('disabled');
+      button.disabled = false;
     }
   },
 });
 
 button.addEventListener('click', () => {
-  button.setAttribute('disabled', true);
-  input.setAttribute('disabled', true);
+  button.disabled = true;
+  input.disabled = true;
 
   const userSelectedDateTimestamp = new Date(userSelectedDate).getTime();
+  let countdownInterval;
 
   function updateTimer() {
     const diff = convertMs(userSelectedDateTimestamp - new Date().getTime());
-    timerElements.forEach(element => {
-      document.querySelector(`[data-${element}]`).textContent = addLeadingZero(
-        diff[element]
-      );
-    });
+    if (diff.days < 0) {
+      clearInterval(countdownInterval);
+      input.disabled = false;
+    } else {
+      timerElements.forEach(element => {
+        document.querySelector(`[data-${element}]`).textContent =
+          addLeadingZero(diff[element]);
+      });
+    }
   }
 
   updateTimer();
-  setInterval(updateTimer, 1000);
+  countdownInterval = setInterval(updateTimer, 1000);
 });
 
 function convertMs(ms) {
